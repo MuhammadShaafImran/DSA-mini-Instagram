@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DSA Lab project (mini Instagram)", "DSA Lab project (mini Instagram).vcxproj", "{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Debug|x64.ActiveCfg = Debug|x64
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Debug|x64.Build.0 = Debug|x64
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Debug|x86.ActiveCfg = Debug|Win32
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Debug|x86.Build.0 = Debug|Win32
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Release|x64.ActiveCfg = Release|x64
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Release|x64.Build.0 = Release|x64
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Release|x86.ActiveCfg = Release|Win32
+		{68D24B7E-E1F0-4DB7-9204-6C4AD29881FC}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6A02D47E-30F7-4B89-9DB9-95C7FF026E21}
+	EndGlobalSection
+EndGlobal
