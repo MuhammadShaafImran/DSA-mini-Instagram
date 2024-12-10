@@ -45,9 +45,7 @@ public:
         if (front == nullptr) {
             rear = nullptr;
         }
-        else {
-            count--;
-        }
+        count--;
         delete temp;
     }
 
@@ -79,7 +77,7 @@ public:
 
     //is Empty
     bool isEmpty() {
-        return (this->front == nullptr && this->rear == nullptr);
+        return (front == nullptr && rear == nullptr);
     }
 
     //Find funciton
@@ -92,8 +90,8 @@ public:
             }
             else {
                 enqueue(Top()->data);
-                dequeue();
             }
+            dequeue();
             index++;
         }
         return temp;

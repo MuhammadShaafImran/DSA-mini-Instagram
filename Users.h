@@ -1,48 +1,23 @@
 #pragma once
 #include <iostream>
 #include <algorithm>
-#include "User.h"
-#include "Followers.h"
-#include "stack.h"
-#include "Queue.h"
 #include "Message.h"
-#include "vector"
-#include "Notification.h"
+#include <libpq-fe.h>
+#include "HashTable.h"
+#include "u_node.h "
 
 using namespace std;
-
-struct info{
-    user* user_details;
-    Followers* followers;
-    stack<notification> notifications;
-    Queue<string>requests;
-    info():user_details(new user),followers(new Followers) {};
-    info(user* user) :user_details(user) {
-        this->followers = new Followers;
-    }
-    void Display_Details() {
-        user_details->Display();
-        followers->Display_Friends();
-        notifications.Display();
-    }
-};
-
-struct u_node {
-    info* data;
-    u_node* left;
-    u_node* right;
-
-    u_node(info* new_data) : data(new_data), left(nullptr), right(nullptr) {};
-};
 
 class users {
 private:
     u_node* root_node;
+    UserHashTable hashTable;
 
     // Insertion Function
     void insert_function(u_node*& root, user* value) {
         if (root == nullptr) {
             root = new u_node(new info(value));
+            hashTable.insert(value->get_username(), root);
             return;
         }
         if (root->data->user_details->get_username() > value->get_username()) {
@@ -53,6 +28,22 @@ private:
         }
         BalancingFactor_function(root);
     }
+
+    void insert_function(u_node*& root, info*& value) {
+        if (root == nullptr) {
+            root = new u_node(value);
+            hashTable.insert(value->user_details->get_username(), root);
+            return;
+        }
+        if (root->data->user_details->get_username() > value->user_details->get_username()) {
+            insert_function(root->left, value);
+        }
+        if (root->data->user_details->get_username() < value->user_details->get_username()) {
+            insert_function(root->right, value);
+        }
+        BalancingFactor_function(root);
+    }
+
 
     void BalancingFactor_function(u_node*& root) {
         if (root == nullptr) return;
@@ -122,11 +113,13 @@ private:
         else {
             if (root->left == nullptr) {
                 u_node* temp = root->right;
+                hashTable.remove(root->data->user_details->get_username()); 
                 delete root;
                 root = temp;
             }
             else if (root->right == nullptr) {
                 u_node* temp = root->left;
+                hashTable.remove(root->data->user_details->get_username());
                 delete root;
                 root = temp;
             }
@@ -177,6 +170,10 @@ public:
         insert_function(root_node, data);
     }
 
+    void insert(info*& data) {
+        insert_function(root_node, data);
+    }
+
     void Display() {
         Display_function(root_node);
     }
@@ -195,6 +192,10 @@ public:
     }
 
     u_node* find(std::string username) {
+        u_node* node = hashTable.search(username);
+        if (node != nullptr) {
+            return node; 
+        }
         return find_function(root_node, username);
     }
 
@@ -203,7 +204,7 @@ public:
     }
 
     //Send requests
-    void send_request_function(u_node*& sender_, string receiver_) {
+    bool send_request_function( u_node*& sender_, string receiver_) {
         u_node* receiver = find_function(root_node, receiver_);
         notification* sender_notification = new notification, *receiver_notification = new notification;
         if (receiver != nullptr) {
@@ -213,15 +214,18 @@ public:
 
             sender_->data->notifications.push(sender_notification);
             receiver->data->notifications.push(receiver_notification);
+            return true;
         }
+        return false;
     }
 
     //Accept requests
-    void accept_reject_list(u_node*& user_, string friend_, string command) {
+    bool accept_reject_list(u_node*& user_, string friend_, string command) {
         string user_friend_name = user_->data->requests.find(friend_); //remove the friend name from queue;
-        if (user_friend_name == "None") return;
+        if (user_friend_name == "None") false;
         u_node* Friend = find_function(root_node, user_friend_name);
         notification* sender_notification = new notification, * receiver_notification = new notification;
+        bool check = false;
         if (Friend != nullptr) {
             if (command == "accept") {
                 user_->data->followers->insert(Friend->data->user_details);
@@ -229,6 +233,8 @@ public:
 
                 sender_notification->setNotification("Request Accepted",Friend->data->user_details->get_username()+" Add to Friend List.");
                 receiver_notification->setNotification("Friend Added ", user_->data->user_details->get_username() + " Add to Friend List.");
+
+                check = true;
             }
             else if (command == "rejected"|| command == "reject") {
                 sender_notification->setNotification("Request rejected", Friend->data->user_details->get_username() );
@@ -237,6 +243,7 @@ public:
         }
 
         std::cout << user_friend_name << std::endl;
+        return check;
     }
 
     //push messages
@@ -261,13 +268,53 @@ public:
         user->data->followers->view_Messages(friend_);
     }
 
-    //view notification
-    void view_notifications(u_node*&user) {
+    void view_notifications(PGconn* conn, u_node*& user) {
         while (!user->data->notifications.isEmpty()) {
-            notification *view = user->data->notifications.pop();
-            cout << view->getNotification_title() << ": " << view->getNotification_content() << " | Time Stamp: " << view->getNotification_timePublished()<< endl;
+            notification* view = user->data->notifications.pop();
+
+            cout << view->getNotification_title() << ": "<< view->getNotification_content() << " | Time Stamp: " << view->getNotification_timePublished() << endl;
+
+            // Construct the query safely with proper escaping
+            string title = view->getNotification_title();
+            string content = view->getNotification_content();
+            string user_id = to_string(user->data->user_details->get_user_id());
+
+            // Make sure to escape single quotes within the title or content to prevent SQL injection
+            title = PQescapeLiteral(conn, title.c_str(), title.length());
+            content = PQescapeLiteral(conn, content.c_str(), content.length());
+
+            string query = "SELECT user_id, topic, topic_info FROM notification WHERE user_id = " + user_id +
+                " AND topic = " + title + " AND topic_info = " + content + ";";
+
+            PGresult* res = PQexec(conn, query.c_str());
+
+            if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+                fprintf(stderr, "SELECT query failed: %s\n", PQerrorMessage(conn));
+                PQclear(res);
+                return;
+            }
+
+            // Check if there are any rows returned
+            if (PQntuples(res) > 0) {
+                // Proceed to delete the notification from the table
+                string delete_query = "DELETE FROM notification WHERE user_id = " + user_id +
+                    " AND topic = " + title + " AND topic_info = " + content + ";";
+                PGresult* sub_res = PQexec(conn, delete_query.c_str());
+
+                if (PQresultStatus(sub_res) != PGRES_COMMAND_OK) {
+                    fprintf(stderr, "DELETE query failed: %s\n", PQerrorMessage(conn));
+                    PQclear(sub_res);
+                    PQclear(res);
+                    return;
+                }
+
+                PQclear(sub_res);
+            }
+
+            PQclear(res);  // Always clear the result after use
         }
     }
+
 
 };
 
