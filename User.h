@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <string>
 #include "Post.h"
 #include "stack.h"
 #include "Queue.h"
@@ -20,12 +19,12 @@ public:
 	user() :username("none"), password("none"), city("none"), Lastlogin(0),user_id(0) {
 		this->Posts = new stack<post>;
 	};
-	user(std::size_t user_id_,std::string username_, std::string password_, std::string city_) {
+	user(std::string username_, std::string password_, std::string city_) {
 		this->username = username_;
 		this->password = password_;
 		this->city = city_;
 		this->Lastlogin = 0;
-		this->user_id = user_id_;
+		this->user_id = 0;
 		this->Posts = new stack<post>;
 	}
 	//setter functions
@@ -60,20 +59,26 @@ public:
 	}
 
 	// getter functions 
-	std::string get_username() {
+	std::string get_username()const {
 		return this->username;
 	}
-	std::string get_password() {
+	std::string get_password()const {
 		return this->password;
 	}
-	std::string get_city() {
+	std::string get_city() const {
 		return this->city;
 	}
-	std::size_t get_user_id() {
+	std::size_t get_user_id() const {
 		return this->user_id;
 	}
-	std::size_t get_Time() {
+	std::size_t get_Time()const {
 		return this->Lastlogin;
+	}
+	post* get_post() {
+		if (!Posts->isEmpty()) {
+			return Posts->pop();
+		}
+		return nullptr;
 	}
 	//Display function
 	void Display_posts() {

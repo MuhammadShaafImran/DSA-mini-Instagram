@@ -4,6 +4,7 @@
 #include "User.h"
 #include "Message.h"
 #include "stack.h"
+#include <string>
 
 struct Node {
     user* user_info;
@@ -107,7 +108,7 @@ private:
     void Display_Friends_function(Node* root) const {
         if (root != nullptr) {
             Display_Friends_function(root->left);
-            std::cout << root->user_info->get_username() << " ";
+            std::cout << root->user_info->get_username() << std::endl;
             Display_Friends_function(root->right);
         }
     }
@@ -145,13 +146,15 @@ private:
             return find_friend_function(root->right, person);
         }
         else {
-            return this->root_node;
+            return root;
         }
     }
 
     void Display_user_friend_posts_function(Node*root) const {
         if (root != nullptr) {
             Display_user_friend_posts_function(root->left);
+            cout << "----------------------------------------------------------" << endl;
+            cout << root->user_info->get_username() + " Posts:" << endl;
             root->user_info->Display_posts();
             Display_user_friend_posts_function(root->right);
         }
@@ -185,15 +188,30 @@ public:
     }
     void view_Messages(string search_friend) {
         Node* Friend = find_friend_function(this->root_node,search_friend);
-        Friend->Conversation.Display();
+        stack<message> temp;
+        while (Friend->Conversation.peek() != nullptr) {
+            message* temp_post = Friend->Conversation.peek();
+            cout << temp_post->getUser() << " : " << temp_post->getUserMessage() << " |Time Stamp:" << temp_post->getTimeTalk() << endl;
+            temp.push(temp_post);
+            Friend->Conversation.pop();
+        }
+        //moving back the stack items
+        while (!temp.isEmpty()) {
+            Friend->Conversation.push(temp.peek());
+            temp.pop();
+        }
     }
 
-    void push_messages(string friend_,string title_, string context_) {
-        Node* Friend = find_friend_function(this->root_node, friend_);
-        Friend->Conversation.push(new message(title_, context_));
+    void push_messages(string sender_,string receiver_, string context_) {
+        Node* receiver = find_friend_function(this->root_node, receiver_);
+        receiver->Conversation.push(new message(sender_, context_));
     }
 
     void Display_user_friend_posts() {
         Display_user_friend_posts_function(root_node);
+    }
+
+    Node* get_root_node() {
+        return root_node;
     }
 };

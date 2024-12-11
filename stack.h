@@ -22,15 +22,19 @@ public:
     }
 
     void push(T* value) {
-        node<T>* news_node = new node<T>(value);
-        news_node->next = top;
-        top = news_node;
+        node<T>* new_node = new node<T>(value);
+        if (top == nullptr) {
+            top = new_node;
+            return;
+        }
+        new_node->next = top;
+        top = new_node;
         //std::cout << "Post pushed to stack." << std::endl;
     }
 
     T* pop() {
         if (isEmpty()) {
-            std::cout << "stack is empty. Cannot pop." << std::endl;
+            //std::cout << "stack is empty. Cannot pop." << std::endl;
             return nullptr;
         }
 

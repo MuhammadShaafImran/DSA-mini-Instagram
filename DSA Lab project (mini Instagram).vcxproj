@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="HashTable.h" />
     <ClCompile Include="practice.cpp" />
     <ClCompile Include="testing.cpp" />
     <ClCompile Include="Users.h" />
@@ -160,6 +161,7 @@
     <ClInclude Include="notification.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="stack.h" />
+    <ClInclude Include="u_node.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
